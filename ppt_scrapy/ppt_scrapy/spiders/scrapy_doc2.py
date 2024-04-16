@@ -59,6 +59,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 return 'Finished'
         
         last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
+
         self.page = 2
         yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
@@ -68,6 +69,18 @@ class ScrapyDocSpider(scrapy.Spider):
 
         num = 1
         content = []
+        if '引述' in response.xpath("//div[@id='main-content']/span[1]/text()").get():
+            further_content = []
+            further_num = 1
+            while '發信站' not in response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get():
+                word = response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get().replace('\n', '').strip()
+                further_content.append(word)
+                further_num += 1
+                if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
+                    further_num += 1
+
+
+
         author = response.xpath("//div[@id='main-content']/div[1]/span[2]/text()").get()
         date = response.xpath("//div[@id='main-content']/div[4]/span[2]/text()").get()
         contents = response.xpath("//div[@id='main-content']/text()")
@@ -94,6 +107,8 @@ class ScrapyDocSpider(scrapy.Spider):
             comments_item['comment_content'] = comment_content.replace(': ', '')
             document_item['post_comment'].append(dict(comments_item))
             yield document_item
+
+  
 
 
 
