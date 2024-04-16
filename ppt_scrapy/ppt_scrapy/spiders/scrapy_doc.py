@@ -1,5 +1,5 @@
 import scrapy
-
+import re
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc'
@@ -15,7 +15,8 @@ class ScrapyDocSpider(scrapy.Spider):
         for row in table:
             title = row.xpath(".//div[@class='title']/a/text()").get()
             url = row.xpath(".//div[@class='title']/a/@href").get()
+            match = re.search(r'\[(.*?)\]', title)
             yield {
-                'title': f'列表名稱 {title}',
-                'url': f'網址 {url}',
+                '列表名稱': match.group(1),
+                '網址': url,
             }
