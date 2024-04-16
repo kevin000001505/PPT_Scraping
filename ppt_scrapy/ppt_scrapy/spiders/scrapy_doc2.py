@@ -14,6 +14,7 @@ class ScrapyDocSpider(scrapy.Spider):
         self.today = dt.date.today()
         self.page = 1
         self.seven_days_ago = self.today - timedelta(days=7)
+
         for url in self.start_urls:
             yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.parse)
 
@@ -35,12 +36,11 @@ class ScrapyDocSpider(scrapy.Spider):
             
             if self.page == 1 and link in exclude_list:
                 continue
-            
+
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
-            
-            if self.seven_days_ago <= check_date: # using today for test 
-
+            if self.today <= check_date: # using today for test 
+                
                 date = row.xpath(".//div[@class='date']/text()").get()
                 document_item['simple_date'] = date
                 
@@ -57,7 +57,8 @@ class ScrapyDocSpider(scrapy.Spider):
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
             else:
                 return 'Finished'
-        
+        print(title)
+        time.sleep(2)
         last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
 
         self.page = 2
@@ -78,7 +79,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 further_num += 1
                 if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
                     further_num += 1
-
+            content.append(further_content)
 
 
         author = response.xpath("//div[@id='main-content']/div[1]/span[2]/text()").get()
@@ -106,7 +107,7 @@ class ScrapyDocSpider(scrapy.Spider):
             comments_item['comment_date'] = comment_date
             comments_item['comment_content'] = comment_content.replace(': ', '')
             document_item['post_comment'].append(dict(comments_item))
-            yield document_item
+        yield document_item
 
   
 
