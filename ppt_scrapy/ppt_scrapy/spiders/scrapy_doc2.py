@@ -31,6 +31,8 @@ class ScrapyDocSpider(scrapy.Spider):
             title = row.xpath(".//div[@class='title']/a/text()").get()
             if title == None:
                 continue
+            print(title)
+            time.sleep(2)
             link = row.xpath(".//div[@class='title']/a/@href").get()
             
             if self.page == 1 and link in exclude_list:
@@ -39,7 +41,7 @@ class ScrapyDocSpider(scrapy.Spider):
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
             
-            if self.seven_days_ago <= check_date <= self.today: # using today for test 
+            if self.seven_days_ago <= check_date: # using today for test 
 
                 date = row.xpath(".//div[@class='date']/text()").get()
                 document_item['simple_date'] = date
@@ -51,8 +53,9 @@ class ScrapyDocSpider(scrapy.Spider):
                     category = 'None'
 
                 
-                document_item['title'] = title.split(']', 1)[1].strip()
+                document_item['title'] = title
                 document_item['category'] = category
+
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
             else:
                 return 'Finished'
