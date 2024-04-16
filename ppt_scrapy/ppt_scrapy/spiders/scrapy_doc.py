@@ -15,5 +15,7 @@ class ScrapyDocSpider(scrapy.Spider):
         for row in table:
             title = row.xpath(".//div[@class='title']/a/text()").get()
             url = row.xpath(".//div[@class='title']/a/@href").get()
-            print(title)
-            print(url)
+            yield {
+                'title': f'列表名稱 {title}',
+                'url': f'網址 {url}',
+            }
