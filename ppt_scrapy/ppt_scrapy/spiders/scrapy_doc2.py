@@ -57,8 +57,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
             else:
                 return 'Finished'
-        print(title)
-        time.sleep(2)
+
         last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
 
         self.page = 2
