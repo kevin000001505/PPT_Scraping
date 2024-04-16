@@ -1,9 +1,9 @@
 import scrapy
 import re
-from ppt_scrapy.items import PptScrapyItem, ComentScrapyItem
+from ppt_scrapy.items import PptScrapyItem
 
 class ScrapyDocSpider(scrapy.Spider):
-    name = 'scrapy_doc'
+    name = 'scrapy_doc2'
     allowed_domains = ['www.ptt.cc']
     start_urls = ['https://www.ptt.cc/bbs/Gossiping/index.html']
 
@@ -14,8 +14,8 @@ class ScrapyDocSpider(scrapy.Spider):
     def parse(self, response):
         table = response.xpath("//div[@class='r-ent']")
         for row in table:
-            url = row.xpath(".//div[@class='title']/a/@href").get()
-        yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.extract_comment)
+            link = row.xpath(".//div[@class='title']/a/@href").get()
+            yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
 
     def extract_comment(self, response):
         document_item = PptScrapyItem()
@@ -24,5 +24,14 @@ class ScrapyDocSpider(scrapy.Spider):
         match = re.search(r'\[(.*?)\]', title)
         category = match.group(1)
         date = response.xpath("//div[@id='main-content']/div[4]/span[2]/text()").get()
+        content = response.xpath("//div[@id='main-content']/text()[2]").getall()
+        yield{
+            'title': title,
+            'author': author,
+            'category': category,
+            'date': date,
+            'content': content,
+        }
         # Now deal with the comments
+
 
