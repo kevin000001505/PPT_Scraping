@@ -2,6 +2,8 @@ import scrapy
 import re
 from ppt_scrapy.items import PptScrapyItem, PptCommentScrapyItem
 import time
+import datetime as dt
+from datetime import datetime, timedelta
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc2'
@@ -9,6 +11,7 @@ class ScrapyDocSpider(scrapy.Spider):
     start_urls = ['https://www.ptt.cc/bbs/Gossiping/index.html']
 
     def start_requests(self):
+        self.today = dt.date.today()
         for url in self.start_urls:
             yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.parse)
     
@@ -16,8 +19,11 @@ class ScrapyDocSpider(scrapy.Spider):
         table = response.xpath("//div[@class='r-ent']")
         document_item = PptScrapyItem()
         for row in table:
-            check_date = row.xpath(",//div[@class='date']/text()")
-            if check_date: # check date
+            check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
+            check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
+            seven_days_ago = self.today - timedelta(days=7)
+
+            if seven_days_ago <= check_date <= self.today: # check date
 
                 date = row.xpath(".//div[@class='date']/text()").get()
                 link = row.xpath(".//div[@class='title']/a/@href").get()
@@ -33,7 +39,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
         
         last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
-        yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
+        yield response.follow(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
 
     def extract_comment(self, response):
