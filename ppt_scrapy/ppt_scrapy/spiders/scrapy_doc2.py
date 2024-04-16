@@ -39,7 +39,7 @@ class ScrapyDocSpider(scrapy.Spider):
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
             
-            if self.today <= check_date <= self.today: # using today for test 
+            if self.seven_days_ago <= check_date <= self.today: # using today for test 
 
                 date = row.xpath(".//div[@class='date']/text()").get()
                 document_item['simple_date'] = date
