@@ -1,5 +1,6 @@
 import scrapy
 import re
+from ppt_scrapy.items import PptScrapyItem, ComentScrapyItem
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc'
@@ -11,12 +12,21 @@ class ScrapyDocSpider(scrapy.Spider):
             yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.parse)
     
     def parse(self, response):
+        document_item = PptScrapyItem()
         table = response.xpath("//div[@class='r-ent']")
         for row in table:
-            title = row.xpath(".//div[@class='title']/a/text()").get()
+            # 標題
+            document_item['title'] = row.xpath(".//div[@class='title']/a/text()").get()
             url = row.xpath(".//div[@class='title']/a/@href").get()
             match = re.search(r'\[(.*?)\]', title)
-            yield {
-                '列表名稱': match.group(1),
-                '網址': url,
-            }
+            # 累別
+            document_item['category'] = match.group(1)
+            # 作者
+            document_item['author'] = row.xpath(".//div[@class='author']/text()").get()
+            # 發布時間
+            document_item['date'] = row.xpath(".//div[@class='date']/text()").get()
+
+        yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.extract_comment)
+    def extract_comment(self, response):
+        # remember content
+        pass
