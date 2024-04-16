@@ -31,8 +31,6 @@ class ScrapyDocSpider(scrapy.Spider):
             title = row.xpath(".//div[@class='title']/a/text()").get()
             if title == None:
                 continue
-            print(title)
-            time.sleep(2)
             link = row.xpath(".//div[@class='title']/a/@href").get()
             
             if self.page == 1 and link in exclude_list:
