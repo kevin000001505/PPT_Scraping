@@ -12,7 +12,7 @@ class PptScrapyItem(scrapy.Item):
     date = scrapy.Field()
     content = scrapy.Field()
     category = scrapy.Field()
-    # comment
+class PptCommentScrapyItem(scrapy.Item):
     comment_author = scrapy.Field()
     comment_date = scrapy.Field()
     comment_content = scrapy.Field()
