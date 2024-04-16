@@ -9,9 +9,12 @@ import scrapy
 class PptScrapyItem(scrapy.Item):
     title = scrapy.Field()
     author = scrapy.Field()
-    date = scrapy.Field()
+    simple_date = scrapy.Field()
+    explicity_date = scrapy.Field()
     content = scrapy.Field()
     category = scrapy.Field()
+    post_comment = scrapy.Field()
+
 class PptCommentScrapyItem(scrapy.Item):
     comment_author = scrapy.Field()
     comment_date = scrapy.Field()
