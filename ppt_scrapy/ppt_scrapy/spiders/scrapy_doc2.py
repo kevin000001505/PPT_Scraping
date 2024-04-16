@@ -34,8 +34,9 @@ class ScrapyDocSpider(scrapy.Spider):
         document_item['author'] = author
         document_item['date'] = date
         document_item['content'] = filter_content
+        document_item['post_comment'] = []
         print('======================================================================================')
-        yield document_item
+        
 
         # Now deal with the comments
         comment_title = response.xpath("//div[@id='main-content']/div[3]/span[2]/text()").get()
@@ -47,9 +48,9 @@ class ScrapyDocSpider(scrapy.Spider):
 
             comments_item['comment_author'] = comment_author
             comments_item['comment_date'] = comment_date
-            comments_item['comment_content'] = comment_content
-            print(comment_title)
-            yield comments_item
+            comments_item['comment_content'] = comment_content.replace(': ', '')
+            document_item['post_comment'].append(dict(comments_item))
+            yield document_item
 
     def parse(self, response):
         document_item = PptScrapyItem()
