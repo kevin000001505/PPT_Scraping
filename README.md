@@ -4,9 +4,6 @@
 
 ## Data
 #### [Task 1 json file](https://github.com/kevin000001505/PPT_Scraping/blob/main/ppt_scrapy/task1_results.json)
-#### [Task 2 json file](https://github.com/kevin000001505/PPT_Scraping/blob/main/ppt_scrapy/PPT_post_comment.json)
+#### [Task 2 json file](https://github.com/kevin000001505/PPT_Scraping/tree/main/ppt_scrapy/data)
 
 
-## Guide
-#### For Task2
-###### The file is large you may need to download it to see
