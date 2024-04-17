@@ -3,6 +3,11 @@ import re
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc'
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'ppt_scrapy.pipelines.Task1Pipeline':300
+        }
+    }
     allowed_domains = ['www.ptt.cc']
     start_urls = ['https://www.ptt.cc/bbs/Gossiping/index.html']
 

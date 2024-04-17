@@ -7,6 +7,11 @@ from datetime import datetime, timedelta
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc2'
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
+        }
+    }
     allowed_domains = ['www.ptt.cc']
     start_urls = ['https://www.ptt.cc/bbs/Gossiping/index.html']
 
