@@ -68,8 +68,8 @@ class ScrapyDocSpider(scrapy.Spider):
         document_item['category'] = category
         document_item['title'] = title
         document_item['date'] = content_date
+        document_item['content'] = []
         document_item['post_comment'] = []
-
         num = 1
 
         if '引述' in response.xpath("//div[@id='main-content']/span[1]/text()").get():
@@ -81,26 +81,27 @@ class ScrapyDocSpider(scrapy.Spider):
                 further_num += 1
                 if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
                     further_num += 1
-            document_item['post_comment'].append(str(further_content))
+            document_item['content'].append(str(further_content))
 
         while response.xpath(f"//div[@id='main-content']/text()[{num}]"):
-            document_item['post_comment'].append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
+            document_item['content'].append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
             num += 1
 
-        filter_content = [items for items in document_item['post_comment'] if items != '']
+        filter_content = [items for items in document_item['content'] if items != '']
 
-        document_item['post_comment'] = filter_content
+        document_item['content'] = filter_content
+
         # Now deal with the comments
-        comment_title = response.xpath("//div[@id='main-content']/div[3]/span[2]/text()").get()
         comments_table = response.xpath("//div[@class='push']")
         for comment in comments_table:
             comment_author = comment.xpath(".//span[@class='f3 hl push-userid']/text()").get()
-            comment_content = comment.xpath(".//span[@class='f3 push-content']/text()[1]").get()
+            comment_content = comment.xpath(".//span[@class='f3 push-content']/text()").get()
             comment_date = comment.xpath(".//span[@class='push-ipdatetime']/text()").get().replace('\n', '').split(' ')[-2::]
 
             comments_item['comment_author'] = comment_author
             comments_item['comment_date'] = comment_date
             comments_item['comment_content'] = comment_content.replace(': ', '')
+
             document_item['post_comment'].append(dict(comments_item))
         yield document_item
 
