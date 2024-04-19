@@ -1,5 +1,4 @@
 import scrapy
-import re
 from ppt_scrapy.items import PptScrapyItem, PptCommentScrapyItem
 import time
 import datetime as dt
