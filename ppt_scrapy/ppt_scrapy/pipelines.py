@@ -44,7 +44,7 @@ class PPtMySQLPipeline:
         self.connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='@America155088',
+            password='yourpassword',
             database='PPT'
         )
         self.cursor = self.connection.cursor()
@@ -61,7 +61,7 @@ class PPtMySQLPipeline:
         values = (
             item.get('title'),
             item.get('author'),
-            item.get('simple_date'),
+            item.get('date'),
             contents,
             comments
         )

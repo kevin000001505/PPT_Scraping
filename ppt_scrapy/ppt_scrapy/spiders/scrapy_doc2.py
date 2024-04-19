@@ -8,7 +8,7 @@ class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc2'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
+            #'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
             'ppt_scrapy.pipelines.PPtMySQLPipeline':400
         }
     }
