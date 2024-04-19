@@ -42,8 +42,8 @@ class ScrapyDocSpider(scrapy.Spider):
 
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
-            if self.seven_days_ago <= check_date: # using today for test 
-                
+            #if self.seven_days_ago <= check_date: # using today for test 
+            if self.page ==1:
                 date = row.xpath(".//div[@class='date']/text()").get()
 
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
@@ -81,7 +81,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 further_num += 1
                 if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
                     further_num += 1
-            document_item['post_comment'].append(further_content)
+            document_item['post_comment'].append(str(further_content))
 
         while response.xpath(f"//div[@id='main-content']/text()[{num}]"):
             document_item['post_comment'].append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
