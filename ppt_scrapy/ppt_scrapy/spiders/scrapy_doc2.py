@@ -42,8 +42,7 @@ class ScrapyDocSpider(scrapy.Spider):
 
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
-            #if self.seven_days_ago <= check_date: # using today for test 
-            if self.page ==1:
+            if self.seven_days_ago <= check_date: # using today for test 
                 date = row.xpath(".//div[@class='date']/text()").get()
 
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
