@@ -1,5 +1,4 @@
 import scrapy
-import re
 from ppt_scrapy.items import PptScrapyItem, PptCommentScrapyItem
 import time
 import datetime as dt
@@ -10,6 +9,7 @@ class ScrapyDocSpider(scrapy.Spider):
     custom_settings = {
         'ITEM_PIPELINES': {
             'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
+            'ppt_scrapy.pipelines.PPtMySQLPipeline':400
         }
     }
     allowed_domains = ['www.ptt.cc']
@@ -24,7 +24,6 @@ class ScrapyDocSpider(scrapy.Spider):
             yield scrapy.Request(url, cookies={'over18': '1'}, callback=self.parse)
 
     def parse(self, response):
-        document_item = PptScrapyItem()
 
         if self.page == 1:
             exclude_table = response.xpath("//div[@class='r-list-sep']/following-sibling::node()//div[@class='title']")
@@ -34,9 +33,7 @@ class ScrapyDocSpider(scrapy.Spider):
 
         table = response.xpath("//div[@class='r-ent']")
         for row in table:
-            title = row.xpath(".//div[@class='title']/a/text()").get()
-            if title == None:
-                continue
+            
             link = row.xpath(".//div[@class='title']/a/@href").get()
             
             if self.page == 1 and link in exclude_list:
@@ -45,21 +42,9 @@ class ScrapyDocSpider(scrapy.Spider):
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
             if self.seven_days_ago <= check_date: # using today for test 
-                
                 date = row.xpath(".//div[@class='date']/text()").get()
-                document_item['simple_date'] = date
-                
-                match = re.search(r'\[(.*?)\]', title)
-                if match != None:
-                    category = match.group(1)
-                else:
-                    category = 'None'
 
-                
-                document_item['title'] = title
-                document_item['category'] = category
-
-                yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
+                yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
             else:
                 return 'Finished'
 
@@ -69,11 +54,22 @@ class ScrapyDocSpider(scrapy.Spider):
         yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
     def extract_comment(self, response):
-        document_item = response.meta.get('item')
+
+        document_item = PptScrapyItem()
         comments_item = PptCommentScrapyItem()
 
+        author = response.xpath("(//span[@class='article-meta-value'])[1]/text()").get()
+        category = response.xpath("(//span[@class='article-meta-value'])[2]/text()").get()
+        title = response.xpath("(//span[@class='article-meta-value'])[3]/text()").get()
+        content_date = response.xpath("(//span[@class='article-meta-value'])[4]/text()").get()
+        document_item['author'] = author
+        document_item['category'] = category
+        document_item['title'] = title
+        document_item['date'] = content_date
+        document_item['content'] = []
+        document_item['post_comment'] = []
         num = 1
-        content = []
+
         if '引述' in response.xpath("//div[@id='main-content']/span[1]/text()").get():
             further_content = []
             further_num = 1
@@ -83,37 +79,29 @@ class ScrapyDocSpider(scrapy.Spider):
                 further_num += 1
                 if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
                     further_num += 1
-            content.append(further_content)
+            document_item['content'].append(str(further_content))
 
-
-        author = response.xpath("//div[@id='main-content']/div[1]/span[2]/text()").get()
-        date = response.xpath("//div[@id='main-content']/div[4]/span[2]/text()").get()
-        contents = response.xpath("//div[@id='main-content']/text()")
         while response.xpath(f"//div[@id='main-content']/text()[{num}]"):
-            content.append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
+            document_item['content'].append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
             num += 1
-        filter_content = [items for items in content if items != '']
 
-        document_item['author'] = author
-        document_item['explicity_date'] = date
+        filter_content = [items for items in document_item['content'] if items != '']
+
         document_item['content'] = filter_content
-        document_item['post_comment'] = []
 
         # Now deal with the comments
-        comment_title = response.xpath("//div[@id='main-content']/div[3]/span[2]/text()").get()
         comments_table = response.xpath("//div[@class='push']")
         for comment in comments_table:
             comment_author = comment.xpath(".//span[@class='f3 hl push-userid']/text()").get()
-            comment_content = comment.xpath(".//span[@class='f3 push-content']/text()[1]").get()
+            comment_content = comment.xpath(".//span[@class='f3 push-content']/text()").get()
             comment_date = comment.xpath(".//span[@class='push-ipdatetime']/text()").get().replace('\n', '').split(' ')[-2::]
 
             comments_item['comment_author'] = comment_author
             comments_item['comment_date'] = comment_date
             comments_item['comment_content'] = comment_content.replace(': ', '')
+
             document_item['post_comment'].append(dict(comments_item))
         yield document_item
-
-  
 
 
 
