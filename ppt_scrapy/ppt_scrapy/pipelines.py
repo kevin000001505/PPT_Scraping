@@ -8,6 +8,7 @@
 from itemadapter import ItemAdapter
 import json
 import os
+import mysql.connector
 
 class PptScrapyPipeline:
     def open_spider(self, spider):
