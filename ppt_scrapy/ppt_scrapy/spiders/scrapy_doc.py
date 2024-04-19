@@ -18,10 +18,15 @@ class ScrapyDocSpider(scrapy.Spider):
     def parse(self, response):
         table = response.xpath("//div[@class='r-ent']")
         for row in table:
-            title = row.xpath(".//div[@class='title']/a/text()").get()
-            url = row.xpath(".//div[@class='title']/a/@href").get()
-            match = re.search(r'\[(.*?)\]', title)
-            yield {
-                '列表名稱': match.group(1),
-                '網址': url,
-            }
+            link = row.xpath(".//div[@class='title']/a/@href").get()
+            yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_board)
+    
+    def extract_board(self, response):
+        url = response.url
+        category = response.xpath("(//span[@class='article-meta-value'])[2]/text()").get()
+        yield {
+            '列表名稱': category,
+            '列表網址': url,
+        }
+
+        
