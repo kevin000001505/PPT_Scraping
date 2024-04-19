@@ -46,7 +46,7 @@ class ScrapyDocSpider(scrapy.Spider):
                 
                 date = row.xpath(".//div[@class='date']/text()").get()
 
-                yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment, meta={'item': document_item})
+                yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
             else:
                 return 'Finished'
 
