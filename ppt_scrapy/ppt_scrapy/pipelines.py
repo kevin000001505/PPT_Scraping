@@ -37,3 +37,33 @@ class Task1Pipeline:
         line = json.dumps(dict(item), ensure_ascii=False) + "\n"
         self.file.write(line)
         return item
+
+class PPtMySQLPipeline:
+    def open_spider(self, spider):
+        self.connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='@America155088',
+            database='PPT'
+        )
+        self.cursor = self.connection.cursor()
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.connection.close()
+    
+    def process_item(self, item, spider):
+        comments = '/'.join([comment['comment_content'] for comment in item['post_comment']])
+
+        contents = ' '.join(subitem for item in item.get('content') for subitem in (item if isinstance(item, list) else [item]))
+        
+        query = "INSERT INTO posts_details (title, author, date, content, comments) VALUES (%s, %s, %s, %s, %s)"
+        values = (
+            item.get('title'),
+            item.get('author'),
+            item.get('simple_date'),
+            contents,
+            comments
+        )
+        self.cursor.execute(query, values)
+        self.connection.commit()
+        return item
