@@ -8,6 +8,7 @@
 from itemadapter import ItemAdapter
 import json
 import os
+import mysql.connector
 
 class PptScrapyPipeline:
     def open_spider(self, spider):
@@ -22,9 +23,7 @@ class PptScrapyPipeline:
             line = json.dumps(dict(item), ensure_ascii=False)
             file.write(line + "\n")
         return item
-        #line = json.dumps(dict(item), ensure_ascii=False)
-        #self.file.write(line + "\n")
-        #return item
+
 
 class Task1Pipeline:
     def open_spider(self, spider):
@@ -36,4 +35,34 @@ class Task1Pipeline:
     def process_item(self, item, spider):
         line = json.dumps(dict(item), ensure_ascii=False) + "\n"
         self.file.write(line)
+        return item
+
+class PPtMySQLPipeline:
+    def open_spider(self, spider):
+        self.connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='@America155088',
+            database='PPT'
+        )
+        self.cursor = self.connection.cursor()
+    def close_spider(self, spider):
+        self.cursor.close()
+        self.connection.close()
+    
+    def process_item(self, item, spider):
+        comments = '/'.join([comment['comment_content'] for comment in item['post_comment']])
+
+        contents = ' '.join(subitem for item in item.get('content') for subitem in (item if isinstance(item, list) else [item]))
+        
+        query = "INSERT INTO posts_details (title, author, date, content, comments) VALUES (%s, %s, %s, %s, %s)"
+        values = (
+            item.get('title'),
+            item.get('author'),
+            item.get('simple_date'),
+            contents,
+            comments
+        )
+        self.cursor.execute(query, values)
+        self.connection.commit()
         return item
