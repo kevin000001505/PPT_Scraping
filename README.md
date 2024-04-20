@@ -6,7 +6,7 @@
 #### [Task 1 json file](https://github.com/kevin000001505/PPT_Scraping/blob/main/ppt_scrapy/task1_results.json)
 #### [Task 2 json file](https://github.com/kevin000001505/PPT_Scraping/tree/main/ppt_scrapy/data)
 #### In Task 2: 
-I also insert the JSON file into MySQL database, the amount of Task 2 data have 12623
+Because the file is too many, so I turn all the KSON file into zip
 
 
 
