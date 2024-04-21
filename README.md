@@ -8,5 +8,7 @@
 #### In Task 2 file: 
 Because the file is too many, so I turn all the JSON file into zip
 
+#### I also use NLP to turn the context into wordcloud to see these sevenday what kins of word been mention most
+<img src="Text_Mining/wordcloud.png" alt="Example Image" title="An example image" width="700" height="400" />
 
 
