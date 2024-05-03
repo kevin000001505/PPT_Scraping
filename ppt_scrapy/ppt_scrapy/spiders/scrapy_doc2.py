@@ -3,6 +3,11 @@ from ppt_scrapy.items import PptScrapyItem, PptCommentScrapyItem
 import time
 import datetime as dt
 from datetime import datetime, timedelta
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from scrapy.selector import Selector
+
 
 class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc2'
@@ -41,17 +46,14 @@ class ScrapyDocSpider(scrapy.Spider):
 
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
-            if self.seven_days_ago <= check_date: # using today for test 
-                date = row.xpath(".//div[@class='date']/text()").get()
-
+            
+            if self.seven_days_ago <= check_date: # using today for test            
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
-            else:
-                return 'Finished'
-
-        last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
-
+        
         self.page = 2
-        yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
+        if self.seven_days_ago <= check_date:
+            last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
+            yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
     def extract_comment(self, response):
 
