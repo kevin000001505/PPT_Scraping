@@ -9,8 +9,8 @@ class ScrapyDocSpider(scrapy.Spider):
     name = 'scrapy_doc2'
     custom_settings = {
         'ITEM_PIPELINES': {
-            'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
-            #'ppt_scrapy.pipelines.PPtMySQLPipeline':400
+            #'ppt_scrapy.pipelines.PptScrapyPipeline': 300,
+            'ppt_scrapy.pipelines.PPtMySQLPipeline':400
         }
     }
     allowed_domains = ['www.ptt.cc']
@@ -58,10 +58,10 @@ class ScrapyDocSpider(scrapy.Spider):
         document_item = PptScrapyItem()
         comments_item = PptCommentScrapyItem()
 
-        author = response.xpath("(//span[@class='article-meta-value'])[1]/text()").get()
+        author = response.xpath("(//div[@class='article-metaline'])[1]/span[2]/text()").get()
         category = response.xpath("(//span[@class='article-meta-value'])[2]/text()").get()
-        title = response.xpath("(//span[@class='article-meta-value'])[3]/text()").get()
-        content_date = response.xpath("(//span[@class='article-meta-value'])[4]/text()").get()
+        title = response.xpath("(//div[@class='article-metaline'])[2]/span[2]/text()").get()
+        content_date = response.xpath("(//div[@class='article-metaline'])[3]/span[2]/text()").get()
         document_item['author'] = author
         document_item['category'] = category
         document_item['title'] = title
