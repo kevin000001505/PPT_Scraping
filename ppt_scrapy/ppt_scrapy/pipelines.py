@@ -44,7 +44,7 @@ class PPtMySQLPipeline:
         self.connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='yourpassword',
+            password='@America155088',
             database='PPT'
         )
         self.cursor = self.connection.cursor()
@@ -57,13 +57,14 @@ class PPtMySQLPipeline:
 
         contents = ' '.join(subitem for item in item.get('content') for subitem in (item if isinstance(item, list) else [item]))
         
-        query = "INSERT INTO posts_details (title, author, date, content, comments) VALUES (%s, %s, %s, %s, %s)"
+        query = "INSERT INTO posts_details (title, author, date, content, comments, category) VALUES (%s, %s, %s, %s, %s, %s)"
         values = (
             item.get('title'),
             item.get('author'),
             item.get('date'),
             contents,
-            comments
+            comments,
+            item.get('category')
         )
         self.cursor.execute(query, values)
         self.connection.commit()

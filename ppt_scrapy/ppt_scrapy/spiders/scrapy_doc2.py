@@ -3,10 +3,6 @@ from ppt_scrapy.items import PptScrapyItem, PptCommentScrapyItem
 import time
 import datetime as dt
 from datetime import datetime, timedelta
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from scrapy.selector import Selector
 
 
 class ScrapyDocSpider(scrapy.Spider):
@@ -47,11 +43,13 @@ class ScrapyDocSpider(scrapy.Spider):
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
             
-            if self.seven_days_ago <= check_date: # using today for test            
+            if self.seven_days_ago <= check_date: 
+            #if self.today == check_date: # using today for test            
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
         
         self.page = 2
         if self.seven_days_ago <= check_date:
+        #if self.today == check_date: 
             last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
             yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
@@ -74,13 +72,11 @@ class ScrapyDocSpider(scrapy.Spider):
 
         if '引述' in response.xpath("//div[@id='main-content']/span[1]/text()").get():
             further_content = []
-            further_num = 1
-            while '發信站' not in response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get():
-                word = response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get().replace('\n', '').strip()
+            further_content.append(response.xpath("//div[@id='main-content']/span[1]/text()").get())
+            for row in response.xpath("//div[@id='main-content']//span[@class='f6']"):
+                word = row.xpath(".//text()").get().replace('\n', '').strip()
                 further_content.append(word)
-                further_num += 1
-                if response.xpath(f"(//div[@id='main-content']/span/text())[{further_num}]").get() is None:
-                    further_num += 1
+                
             document_item['content'].append(str(further_content))
 
         while response.xpath(f"//div[@id='main-content']/text()[{num}]"):
