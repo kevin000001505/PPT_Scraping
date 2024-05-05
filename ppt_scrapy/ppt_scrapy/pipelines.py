@@ -44,7 +44,7 @@ class PPtMySQLPipeline:
         self.connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='@America155088',
+            password='password',
             database='PPT'
         )
         self.cursor = self.connection.cursor()
