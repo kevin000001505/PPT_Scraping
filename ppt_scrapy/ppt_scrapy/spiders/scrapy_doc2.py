@@ -43,13 +43,13 @@ class ScrapyDocSpider(scrapy.Spider):
             check_date = row.xpath(".//div[@class='date']/text()").get().replace(' ', '')
             check_date = datetime.strptime(f"{check_date}/2024", '%m/%d/%Y').date()
             
-            if self.seven_days_ago <= check_date: 
-            #if self.today == check_date: # using today for test            
+            #if self.seven_days_ago <= check_date: 
+            if self.today == check_date: # using today for test            
                 yield scrapy.Request(url=f'https://www.ptt.cc{link}', cookies={'over18': '1'}, callback=self.extract_comment)
         
         self.page = 2
-        if self.seven_days_ago <= check_date:
-        #if self.today == check_date: 
+        #if self.seven_days_ago <= check_date:
+        if self.today == check_date: 
             last_page_link = response.xpath("//a[@class='btn wide'][2]/@href").get()
             yield scrapy.Request(url=f'https://www.ptt.cc{last_page_link}', cookies={'over18': '1'}, callback=self.parse)
 
@@ -79,9 +79,8 @@ class ScrapyDocSpider(scrapy.Spider):
                 
             document_item['content'].append(str(further_content))
 
-        while response.xpath(f"//div[@id='main-content']/text()[{num}]"):
-            document_item['content'].append(response.xpath(f"//div[@id='main-content']/text()[{num}]").get().replace('\n', '').strip())
-            num += 1
+        for row in response.xpath("//div[@id='main-content']/text()"):
+            document_item['content'].append(row.get().replace('\n', '').strip())
 
         filter_content = [items for items in document_item['content'] if items != '']
 
