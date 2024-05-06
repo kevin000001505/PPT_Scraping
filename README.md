@@ -9,6 +9,10 @@
 Because the file is too many, so I turn all the JSON file into zip
 
 #### I also use NLP to turn the context into wordcloud to see these sevenday what kins of word been mention most
-<img src="Text_Mining/wordcloud.png" alt="Example Image" title="An example image" width="700" height="400" />
+##### Most frequent word which len(word) > 2
+<img src="Text_Mining/word_cloud2.png" alt="Example Image" title="An example image" width="700" height="400" />
+
+##### Most frequent word which len(word) > 3
+<img src="Text_Mining/word_cloud3.png" alt="Example Image" title="An example image" width="700" height="400" />
 
 
